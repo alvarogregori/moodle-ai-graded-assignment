@@ -3,7 +3,7 @@
 `mod_aigradedassign` is a Moodle activity module for plain-text assignments with
 automated feedback.
 
-## Version 0.2.2 scope
+## Version 0.2.3 scope
 
 - Standard Moodle activity creation and editing.
 - Student-visible instructions.
