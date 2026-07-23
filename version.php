@@ -4,7 +4,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_aigradedassign';
-$plugin->version = 2026060501;
+$plugin->version = 2026072300;
 $plugin->requires = 2024100700;
 $plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.1.0-alpha';
+$plugin->release = '0.2.0-alpha';

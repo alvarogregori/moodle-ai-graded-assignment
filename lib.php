@@ -1,128 +1,137 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+/**
+ * Library callbacks for mod_aigradedassign.
+ *
+ * @package    mod_aigradedassign
+ * @copyright  2026 Alvaro Gregori
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Declares the Moodle features supported by this activity.
+ *
+ * @param string $feature Feature constant.
+ * @return bool|null
+ */
 function aigradedassign_supports($feature) {
-    switch ($feature) {
-        case FEATURE_MOD_INTRO:
-            return true;
-        case FEATURE_COMPLETION_TRACKS_VIEWS:
-        case FEATURE_SHOW_DESCRIPTION:
-        case FEATURE_COMPLETION_HAS_RULES:
-        case FEATURE_GRADE_HAS_GRADE:
-        case FEATURE_GRADE_OUTCOMES:
-            return false;
-        default:
-            return null;
-    }
+    return match ($feature) {
+        FEATURE_MOD_INTRO,
+        FEATURE_SHOW_DESCRIPTION,
+        FEATURE_COMPLETION_HAS_RULES => true,
+        FEATURE_GRADE_HAS_GRADE,
+        FEATURE_GRADE_OUTCOMES,
+        FEATURE_COMPLETION_TRACKS_VIEWS,
+        FEATURE_GROUPS,
+        FEATURE_GROUPINGS => false,
+        default => null,
+    };
 }
 
-function aigradedassign_add_instance($data, $mform = null) {
+/**
+ * Creates an activity instance.
+ *
+ * @param stdClass $data Form data.
+ * @param mod_aigradedassign_mod_form|null $mform Form instance.
+ * @return int New instance id.
+ */
+function aigradedassign_add_instance($data, $mform = null): int {
     global $DB;
 
-    $data->timecreated = time();
-    $data->timemodified = $data->timecreated;
-    $data->allowedfiletypes = $data->allowedfiletypes ?? '.txt,.doc,.docx';
-    $data->maxfilesize = $data->maxfilesize ?? 0;
+    $now = time();
+    $data->provider = 'mock';
     $data->completionevaluated = !empty($data->completionevaluated) ? 1 : 0;
+    $data->timecreated = $now;
+    $data->timemodified = $now;
 
-    $id = $DB->insert_record('aigradedassign', $data);
-    aigradedassign_save_examples($id, $data);
-
-    return $id;
+    return $DB->insert_record('aigradedassign', $data);
 }
 
-function aigradedassign_update_instance($data, $mform = null) {
+/**
+ * Updates an activity instance.
+ *
+ * @param stdClass $data Form data.
+ * @param mod_aigradedassign_mod_form|null $mform Form instance.
+ * @return bool
+ */
+function aigradedassign_update_instance($data, $mform = null): bool {
     global $DB;
 
     $data->id = $data->instance;
-    $data->timemodified = time();
-    $data->allowedfiletypes = $data->allowedfiletypes ?? '.txt,.doc,.docx';
-    $data->maxfilesize = $data->maxfilesize ?? 0;
+    $data->provider = 'mock';
     $data->completionevaluated = !empty($data->completionevaluated) ? 1 : 0;
+    $data->timemodified = time();
 
-    $DB->update_record('aigradedassign', $data);
-    aigradedassign_save_examples($data->id, $data);
-
-    return true;
+    return $DB->update_record('aigradedassign', $data);
 }
 
-function aigradedassign_delete_instance($id) {
+/**
+ * Deletes an activity instance and its dependent records.
+ *
+ * @param int $id Instance id.
+ * @return bool
+ */
+function aigradedassign_delete_instance($id): bool {
     global $DB;
 
     if (!$DB->record_exists('aigradedassign', ['id' => $id])) {
         return false;
     }
 
-    $submissions = $DB->get_records('aigradedassign_submissions', ['aigradedassignid' => $id], '', 'id');
-    if ($submissions) {
-        [$insql, $params] = $DB->get_in_or_equal(array_keys($submissions), SQL_PARAMS_NAMED);
-        $DB->delete_records_select('aigradedassign_evals', "submissionid $insql", $params);
+    $submissionids = $DB->get_fieldset_select(
+        'aigradedassign_submissions',
+        'id',
+        'aigradedassignid = :activityid',
+        ['activityid' => $id]
+    );
+    if ($submissionids) {
+        [$insql, $params] = $DB->get_in_or_equal($submissionids, SQL_PARAMS_NAMED);
+        $DB->delete_records_select('aigradedassign_evaluations', "submissionid $insql", $params);
     }
-
     $DB->delete_records('aigradedassign_submissions', ['aigradedassignid' => $id]);
-    $DB->delete_records('aigradedassign_examples', ['aigradedassignid' => $id]);
     $DB->delete_records('aigradedassign', ['id' => $id]);
 
     return true;
 }
 
-function aigradedassign_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
-    if ($context->contextlevel !== CONTEXT_MODULE) {
-        return false;
-    }
-
-    require_login($course, true, $cm);
-
-    if (!in_array($filearea, ['submission', 'rubric', 'example_submission'], true)) {
-        return false;
-    }
-
-    $itemid = array_shift($args);
-    $filename = array_pop($args);
-    $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
-
-    $fs = get_file_storage();
-    $file = $fs->get_file($context->id, 'mod_aigradedassign', $filearea, $itemid, $filepath, $filename);
-    if (!$file || $file->is_directory()) {
-        return false;
-    }
-
-    if ($filearea === 'submission' && !has_capability('mod/aigradedassign:viewallsubmissions', $context)) {
-        global $DB, $USER;
-        $submission = $DB->get_record('aigradedassign_submissions', ['id' => $itemid], '*', MUST_EXIST);
-        if ((int)$submission->userid !== (int)$USER->id) {
-            return false;
-        }
-    }
-
-    if ($filearea !== 'submission' && !has_capability('mod/aigradedassign:view', $context)) {
-        return false;
-    }
-
-    send_stored_file($file, 0, 0, $forcedownload, $options);
-}
-
-function aigradedassign_save_examples(int $aigradedassignid, stdClass $data): void {
+/**
+ * Supplies safe cached information used while rendering a course page.
+ *
+ * Keeping this callback small and side-effect free is important because Moodle
+ * calls it while rebuilding the course cache.
+ *
+ * @param stdClass $coursemodule Course-module record.
+ * @return cached_cm_info|false
+ */
+function aigradedassign_get_coursemodule_info($coursemodule) {
     global $DB;
 
-    $DB->delete_records('aigradedassign_examples', ['aigradedassignid' => $aigradedassignid]);
-
-    $sample = trim((string)($data->example1sample ?? ''));
-    $evaluation = trim((string)($data->example1evaluation ?? ''));
-    if ($sample === '' && $evaluation === '') {
-        return;
+    $activity = $DB->get_record(
+        'aigradedassign',
+        ['id' => $coursemodule->instance],
+        'id,name,intro,introformat,completionevaluated'
+    );
+    if (!$activity) {
+        return false;
     }
 
-    $DB->insert_record('aigradedassign_examples', (object)[
-        'aigradedassignid' => $aigradedassignid,
-        'sortorder' => 1,
-        'sampletext' => $sample,
-        'sampleformat' => FORMAT_PLAIN,
-        'evaluationtext' => $evaluation,
-        'evaluationformat' => FORMAT_PLAIN,
-        'timecreated' => time(),
-        'timemodified' => time(),
-    ]);
+    $info = new cached_cm_info();
+    $info->name = $activity->name;
+    if ($coursemodule->showdescription) {
+        $info->content = format_module_intro('aigradedassign', $activity, $coursemodule->id, false);
+    }
+    if ($coursemodule->completion == COMPLETION_TRACKING_AUTOMATIC) {
+        $info->customdata['customcompletionrules']['completionevaluated'] =
+            (int) $activity->completionevaluated;
+    }
+
+    return $info;
 }

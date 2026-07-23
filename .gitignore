@@ -9,3 +9,4 @@
 *.log
 *.sql
 Thumbs.db
+tools/*.exe

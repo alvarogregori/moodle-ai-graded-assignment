@@ -11,56 +11,55 @@ $context = context_module::instance($cm->id);
 
 require_login($course, true, $cm);
 require_capability('mod/aigradedassign:submit', $context);
-require_sesskey();
 
-$form = new \mod_aigradedassign\form\submission_form(
-    new moodle_url('/mod/aigradedassign/submit.php'),
-    ['cmid' => $cm->id]
-);
-
+$url = new moodle_url('/mod/aigradedassign/submit.php', ['id' => $cm->id]);
+$form = new \mod_aigradedassign\form\submission_form($url, ['cmid' => $cm->id]);
 if ($form->is_cancelled()) {
     redirect(new moodle_url('/mod/aigradedassign/view.php', ['id' => $cm->id]));
 }
-
-$data = $form->get_data();
-if (!$data) {
+if (!$data = $form->get_data()) {
     redirect(new moodle_url('/mod/aigradedassign/view.php', ['id' => $cm->id]));
 }
 
-$submissiontext = trim($data->submissiontext ?? '');
+$transaction = $DB->start_delegated_transaction();
 $now = time();
-$existing = $DB->get_record('aigradedassign_submissions', [
+$submission = $DB->get_record('aigradedassign_submissions', [
     'aigradedassignid' => $activity->id,
     'userid' => $USER->id,
-], '*', IGNORE_MULTIPLE);
-
-if ($existing) {
-    $submission = $existing;
+]);
+if ($submission) {
+    $submission->submissiontext = trim($data->submissiontext);
     $submission->status = 'submitted';
-    $submission->attemptnumber = (int)$existing->attemptnumber + 1;
-    $submission->extractedtext = $submissiontext;
-    $submission->extractedtextsha256 = hash('sha256', $submissiontext);
-    $submission->errorcode = null;
-    $submission->errormessage = null;
+    $submission->attemptnumber++;
     $submission->timemodified = $now;
-    $submission->timesubmitted = $now;
     $submission->timeevaluated = null;
     $DB->update_record('aigradedassign_submissions', $submission);
 } else {
-    $DB->insert_record('aigradedassign_submissions', (object)[
+    $submission = (object) [
         'aigradedassignid' => $activity->id,
         'userid' => $USER->id,
+        'submissiontext' => trim($data->submissiontext),
         'status' => 'submitted',
         'attemptnumber' => 1,
-        'extractedtext' => $submissiontext,
-        'extractedtextsha256' => hash('sha256', $submissiontext),
-        'errorcode' => null,
-        'errormessage' => null,
         'timecreated' => $now,
         'timemodified' => $now,
-        'timesubmitted' => $now,
-        'timeevaluated' => null,
-    ]);
+    ];
+    $submission->id = $DB->insert_record('aigradedassign_submissions', $submission);
 }
 
-redirect(new moodle_url('/mod/aigradedassign/view.php', ['id' => $cm->id]));
+$service = new \mod_aigradedassign\local\evaluation_service();
+$service->evaluate($activity, $submission);
+$submission->status = 'evaluated';
+$submission->timeevaluated = time();
+$submission->timemodified = $submission->timeevaluated;
+$DB->update_record('aigradedassign_submissions', $submission);
+$transaction->allow_commit();
+
+$completion = new completion_info($course);
+$completion->update_state($cm, COMPLETION_COMPLETE, $USER->id);
+redirect(
+    new moodle_url('/mod/aigradedassign/view.php', ['id' => $cm->id]),
+    get_string('submissionsaved', 'aigradedassign'),
+    null,
+    \core\output\notification::NOTIFY_SUCCESS
+);

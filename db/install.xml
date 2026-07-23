@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/aigradedassign/db" VERSION="2026060501" COMMENT="XMLDB file for Moodle mod_aigradedassign"
+<XMLDB PATH="mod/aigradedassign/db" VERSION="2026072300" COMMENT="XMLDB file for mod_aigradedassign"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
@@ -10,16 +10,10 @@
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT=""/>
         <FIELD NAME="intro" TYPE="text" NOTNULL="false"/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="provider" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="mistral"/>
-        <FIELD NAME="model" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT=""/>
-        <FIELD NAME="temperature" TYPE="number" LENGTH="6" DECIMALS="3" NOTNULL="true" DEFAULT="0.200"/>
-        <FIELD NAME="maxtokens" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="2000"/>
-        <FIELD NAME="maxchars" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="60000"/>
-        <FIELD NAME="allowedfiletypes" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT=".txt,.doc,.docx"/>
-        <FIELD NAME="maxfilesize" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="rubrictext" TYPE="text" NOTNULL="false"/>
-        <FIELD NAME="rubricformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1"/>
-        <FIELD NAME="reevaluateallowed" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="rubrictext" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="exampletext" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="examplefeedback" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="provider" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="mock"/>
         <FIELD NAME="completionevaluated" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
@@ -29,42 +23,16 @@
         <KEY NAME="course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-
-    <TABLE NAME="aigradedassign_examples" COMMENT="Evaluated examples for an AI graded assignment">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="aigradedassignid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="sampletext" TYPE="text" NOTNULL="false"/>
-        <FIELD NAME="sampleformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1"/>
-        <FIELD NAME="evaluationtext" TYPE="text" NOTNULL="false"/>
-        <FIELD NAME="evaluationformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1"/>
-        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="activity" TYPE="foreign" FIELDS="aigradedassignid" REFTABLE="aigradedassign" REFFIELDS="id"/>
-      </KEYS>
-      <INDEXES>
-        <INDEX NAME="activitysort" UNIQUE="false" FIELDS="aigradedassignid, sortorder"/>
-      </INDEXES>
-    </TABLE>
-
-    <TABLE NAME="aigradedassign_submissions" COMMENT="Student submissions">
+    <TABLE NAME="aigradedassign_submissions" COMMENT="Latest plain-text submission per student and activity">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="aigradedassignid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="submissiontext" TYPE="text" NOTNULL="true"/>
         <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="submitted"/>
         <FIELD NAME="attemptnumber" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1"/>
-        <FIELD NAME="extractedtext" TYPE="text" NOTNULL="false"/>
-        <FIELD NAME="extractedtextsha256" TYPE="char" LENGTH="64" NOTNULL="false"/>
-        <FIELD NAME="errorcode" TYPE="char" LENGTH="60" NOTNULL="false"/>
-        <FIELD NAME="errormessage" TYPE="text" NOTNULL="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="timesubmitted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="timeevaluated" TYPE="int" LENGTH="10" NOTNULL="false"/>
       </FIELDS>
       <KEYS>
@@ -73,30 +41,26 @@
         <KEY NAME="user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="activityuser" UNIQUE="false" FIELDS="aigradedassignid, userid"/>
+        <INDEX NAME="activityuser" UNIQUE="true" FIELDS="aigradedassignid,userid"/>
       </INDEXES>
     </TABLE>
-
-    <TABLE NAME="aigradedassign_evals" COMMENT="AI evaluation results">
+    <TABLE NAME="aigradedassign_evaluations" COMMENT="Evaluation generated for the latest submission attempt">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="submissionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-        <FIELD NAME="provider" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT=""/>
-        <FIELD NAME="model" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT=""/>
-        <FIELD NAME="promptversion" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="v1"/>
-        <FIELD NAME="evaluationtext" TYPE="text" NOTNULL="false"/>
-        <FIELD NAME="evaluationformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1"/>
-        <FIELD NAME="rawresponse" TYPE="text" NOTNULL="false"/>
-        <FIELD NAME="finishreason" TYPE="char" LENGTH="60" NOTNULL="false"/>
-        <FIELD NAME="inputtokens" TYPE="int" LENGTH="10" NOTNULL="false"/>
-        <FIELD NAME="outputtokens" TYPE="int" LENGTH="10" NOTNULL="false"/>
-        <FIELD NAME="latencyms" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="attemptnumber" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="provider" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="mock"/>
+        <FIELD NAME="model" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="mock-v1"/>
+        <FIELD NAME="feedbacktext" TYPE="text" NOTNULL="true"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="submission" TYPE="foreign" FIELDS="submissionid" REFTABLE="aigradedassign_submissions" REFFIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="submissionattempt" UNIQUE="true" FIELDS="submissionid,attemptnumber"/>
+      </INDEXES>
     </TABLE>
   </TABLES>
 </XMLDB>

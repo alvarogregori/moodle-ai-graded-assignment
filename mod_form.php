@@ -1,76 +1,107 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+/**
+ * Activity settings form.
+ *
+ * @package    mod_aigradedassign
+ * @copyright  2026 Alvaro Gregori
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
 
+/**
+ * Defines the activity settings form.
+ */
 class mod_aigradedassign_mod_form extends moodleform_mod {
-    public function definition() {
+    /**
+     * Defines form elements.
+     */
+    public function definition(): void {
         $mform = $this->_form;
 
         $mform->addElement('header', 'general', get_string('general', 'form'));
-
-        $mform->addElement('text', 'name', get_string('aigradedassignname', 'aigradedassign'), ['size' => '64']);
+        $mform->addElement('text', 'name', get_string('aigradedassignname', 'aigradedassign'), ['size' => 64]);
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
+        $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
         $this->standard_intro_elements(get_string('instructions', 'aigradedassign'));
 
-        $mform->addElement('header', 'rubricheader', get_string('rubric', 'aigradedassign'));
-        $mform->addElement('textarea', 'rubrictext', get_string('rubrictextplain', 'aigradedassign'), [
-            'rows' => 8,
+        $mform->addElement('header', 'evaluationheader', get_string('evaluationcontext', 'aigradedassign'));
+        $mform->addElement('textarea', 'rubrictext', get_string('rubric', 'aigradedassign'), [
+            'rows' => 10,
             'cols' => 80,
         ]);
-        $mform->setType('rubrictext', PARAM_TEXT);
+        $mform->setType('rubrictext', PARAM_RAW);
         $mform->addRule('rubrictext', null, 'required', null, 'client');
+        $mform->addHelpButton('rubrictext', 'rubric', 'aigradedassign');
 
-        $mform->addElement('header', 'examplesheader', get_string('examples', 'aigradedassign'));
-        $mform->addElement('textarea', 'example1sample', get_string('examplesampleplain', 'aigradedassign'), [
+        $mform->addElement('textarea', 'exampletext', get_string('exampletext', 'aigradedassign'), [
             'rows' => 8,
             'cols' => 80,
         ]);
-        $mform->setType('example1sample', PARAM_TEXT);
-        $mform->addRule('example1sample', null, 'required', null, 'client');
+        $mform->setType('exampletext', PARAM_RAW);
+        $mform->addRule('exampletext', null, 'required', null, 'client');
 
-        $mform->addElement('textarea', 'example1evaluation', get_string('exampleevaluationplain', 'aigradedassign'), [
+        $mform->addElement('textarea', 'examplefeedback', get_string('examplefeedback', 'aigradedassign'), [
             'rows' => 8,
             'cols' => 80,
         ]);
-        $mform->setType('example1evaluation', PARAM_TEXT);
-        $mform->addRule('example1evaluation', null, 'required', null, 'client');
+        $mform->setType('examplefeedback', PARAM_RAW);
+        $mform->addRule('examplefeedback', null, 'required', null, 'client');
+
+        $mform->addElement('static', 'providerdisplay', get_string('provider', 'aigradedassign'),
+            get_string('provider:mock', 'aigradedassign'));
 
         $this->standard_coursemodule_elements();
         $this->add_action_buttons();
     }
 
-    public function data_preprocessing(&$defaultvalues) {
-        global $DB;
-
-        if (empty($defaultvalues['instance'])) {
-            return;
-        }
-
-        $example = $DB->get_record('aigradedassign_examples', [
-            'aigradedassignid' => $defaultvalues['instance'],
-            'sortorder' => 1,
-        ]);
-
-        if ($example) {
-            $defaultvalues['example1sample'] = $example->sampletext;
-            $defaultvalues['example1evaluation'] = $example->evaluationtext;
-        }
+    /**
+     * Adds the custom automatic-completion rule.
+     *
+     * @return array Form element names.
+     */
+    public function add_completion_rules(): array {
+        $name = $this->get_suffixed_name('completionevaluated');
+        $this->_form->addElement('checkbox', $name, '', get_string('completionevaluated', 'aigradedassign'));
+        $this->_form->setDefault($name, 1);
+        return [$name];
     }
 
-    public function validation($data, $files) {
-        $errors = parent::validation($data, $files);
+    /**
+     * Reports whether the custom completion rule is enabled.
+     *
+     * @param array $data Submitted form data.
+     * @return bool
+     */
+    public function completion_rule_enabled($data): bool {
+        return !empty($data[$this->get_suffixed_name('completionevaluated')]);
+    }
 
-        foreach (['rubrictext', 'example1sample', 'example1evaluation'] as $field) {
-            if (trim($data[$field] ?? '') === '') {
+    /**
+     * Validates private plain-text context.
+     *
+     * @param array $data Submitted data.
+     * @param array $files Submitted files.
+     * @return array Validation errors.
+     */
+    public function validation($data, $files): array {
+        $errors = parent::validation($data, $files);
+        foreach (['rubrictext', 'exampletext', 'examplefeedback'] as $field) {
+            if (trim((string) ($data[$field] ?? '')) === '') {
                 $errors[$field] = get_string('required');
             }
         }
-
         return $errors;
     }
 }
