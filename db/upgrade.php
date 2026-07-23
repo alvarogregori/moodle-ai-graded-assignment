@@ -16,7 +16,7 @@ function xmldb_aigradedassign_upgrade($oldversion): bool {
         $dbman = $DB->get_manager();
         $activitytable = new xmldb_table('aigradedassign');
 
-        $exampletext = new xmldb_field('exampletext', XMLDB_TYPE_TEXT, null, null, false, null, null, 'rubricformat');
+        $exampletext = new xmldb_field('exampletext', XMLDB_TYPE_TEXT, null, null, false, null, null);
         if (!$dbman->field_exists($activitytable, $exampletext)) {
             $dbman->add_field($activitytable, $exampletext);
         }
@@ -28,7 +28,7 @@ function xmldb_aigradedassign_upgrade($oldversion): bool {
             false,
             null,
             null,
-            'exampletext'
+            null
         );
         if (!$dbman->field_exists($activitytable, $examplefeedback)) {
             $dbman->add_field($activitytable, $examplefeedback);
@@ -46,6 +46,44 @@ function xmldb_aigradedassign_upgrade($oldversion): bool {
                 ]);
             }
             $dbman->drop_table($examplestable);
+        } else {
+            $oldexamplework = new xmldb_field('examplework', XMLDB_TYPE_TEXT);
+            $oldexampleevaluation = new xmldb_field('exampleevaluation', XMLDB_TYPE_TEXT);
+            if ($dbman->field_exists($activitytable, $oldexamplework)) {
+                $DB->execute("UPDATE {aigradedassign}
+                                SET exampletext = examplework
+                              WHERE exampletext IS NULL");
+            }
+            if ($dbman->field_exists($activitytable, $oldexampleevaluation)) {
+                $DB->execute("UPDATE {aigradedassign}
+                                SET examplefeedback = exampleevaluation
+                              WHERE examplefeedback IS NULL");
+            }
+        }
+
+        $provider = new xmldb_field(
+            'provider',
+            XMLDB_TYPE_CHAR,
+            '30',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            'mock'
+        );
+        if (!$dbman->field_exists($activitytable, $provider)) {
+            $dbman->add_field($activitytable, $provider);
+        }
+        $completionevaluated = new xmldb_field(
+            'completionevaluated',
+            XMLDB_TYPE_INTEGER,
+            '1',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '1'
+        );
+        if (!$dbman->field_exists($activitytable, $completionevaluated)) {
+            $dbman->add_field($activitytable, $completionevaluated);
         }
 
         $submissiontable = new xmldb_table('aigradedassign_submissions');
@@ -60,6 +98,94 @@ function xmldb_aigradedassign_upgrade($oldversion): bool {
         $evaluationtable = new xmldb_table('aigradedassign_evaluations');
         if ($dbman->table_exists($oldstable) && !$dbman->table_exists($evaluationtable)) {
             $dbman->rename_table($oldstable, 'aigradedassign_evaluations');
+        }
+        if (!$dbman->table_exists($evaluationtable)) {
+            $evaluationtable->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE
+            );
+            $evaluationtable->add_field(
+                'submissionid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $evaluationtable->add_field(
+                'attemptnumber',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '1'
+            );
+            $evaluationtable->add_field(
+                'provider',
+                XMLDB_TYPE_CHAR,
+                '30',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'mock'
+            );
+            $evaluationtable->add_field(
+                'model',
+                XMLDB_TYPE_CHAR,
+                '100',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'legacy'
+            );
+            $evaluationtable->add_field('feedbacktext', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+            $evaluationtable->add_field(
+                'timecreated',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $evaluationtable->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $evaluationtable->add_key(
+                'submission',
+                XMLDB_KEY_FOREIGN,
+                ['submissionid'],
+                'aigradedassign_submissions',
+                ['id']
+            );
+            $evaluationtable->add_index(
+                'submissionattempt',
+                XMLDB_INDEX_UNIQUE,
+                ['submissionid', 'attemptnumber']
+            );
+            $dbman->create_table($evaluationtable);
+
+            $legacyfeedback = new xmldb_field('feedback', XMLDB_TYPE_TEXT);
+            if ($dbman->field_exists($submissiontable, $legacyfeedback)) {
+                $submissions = $DB->get_records_select(
+                    'aigradedassign_submissions',
+                    "feedback IS NOT NULL AND feedback <> ''"
+                );
+                foreach ($submissions as $submission) {
+                    $DB->insert_record('aigradedassign_evaluations', (object) [
+                        'submissionid' => $submission->id,
+                        'attemptnumber' => max(1, (int) $submission->attemptnumber),
+                        'provider' => 'mock',
+                        'model' => 'legacy',
+                        'feedbacktext' => $submission->feedback,
+                        'timecreated' => $submission->timeevaluated ?: $submission->timemodified,
+                    ]);
+                }
+            }
         }
         if ($dbman->table_exists($evaluationtable)) {
             $oldfeedback = new xmldb_field('evaluationtext', XMLDB_TYPE_TEXT);

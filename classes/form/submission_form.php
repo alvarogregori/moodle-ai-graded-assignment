@@ -8,6 +8,10 @@
 
 namespace mod_aigradedassign\form;
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->libdir . '/formslib.php');
+
 /**
  * Plain-text student submission form.
  *

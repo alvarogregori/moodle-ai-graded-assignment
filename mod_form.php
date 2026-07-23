@@ -89,6 +89,19 @@ class mod_aigradedassign_mod_form extends moodleform_mod {
     }
 
     /**
+     * Applies Moodle's completion-form suffix to a custom field name.
+     *
+     * Moodle 4.3 and later use a suffix to prevent duplicate completion field
+     * ids when multiple forms are present on the same page.
+     *
+     * @param string $fieldname Base field name.
+     * @return string Suffixed field name.
+     */
+    protected function get_suffixed_name(string $fieldname): string {
+        return $fieldname . $this->get_suffix();
+    }
+
+    /**
      * Validates private plain-text context.
      *
      * @param array $data Submitted data.

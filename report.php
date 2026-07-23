@@ -14,7 +14,7 @@ require_capability('mod/aigradedassign:viewallsubmissions', $context);
 $PAGE->set_url('/mod/aigradedassign/report.php', ['id' => $cm->id]);
 $PAGE->set_title(get_string('report', 'aigradedassign'));
 $PAGE->set_heading(format_string($course->fullname));
-$PAGE->set_activity_record($activity);
+$PAGE->set_cm($cm, $course, $activity);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('report', 'aigradedassign'));

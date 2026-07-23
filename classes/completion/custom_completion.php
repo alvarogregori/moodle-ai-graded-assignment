@@ -30,7 +30,8 @@ class custom_completion extends activity_custom_completion {
         if ($rule !== 'completionevaluated') {
             return COMPLETION_UNKNOWN;
         }
-        $enabled = !empty($this->cm->customdata['customcompletionrules'][$rule]);
+        $customdata = (array) $this->cm->customdata;
+        $enabled = !empty($customdata['customcompletionrules'][$rule]);
         if (!$enabled) {
             return COMPLETION_COMPLETE;
         }
@@ -57,7 +58,8 @@ class custom_completion extends activity_custom_completion {
      * @return array
      */
     public function get_available_custom_rules(): array {
-        return !empty($this->cm->customdata['customcompletionrules']['completionevaluated'])
+        $customdata = (array) $this->cm->customdata;
+        return !empty($customdata['customcompletionrules']['completionevaluated'])
             ? ['completionevaluated']
             : [];
     }
@@ -71,5 +73,14 @@ class custom_completion extends activity_custom_completion {
         return [
             'completionevaluated' => get_string('completionevaluated_desc', 'aigradedassign'),
         ];
+    }
+
+    /**
+     * Returns custom rules in their display order.
+     *
+     * @return array
+     */
+    public function get_sort_order(): array {
+        return ['completionevaluated'];
     }
 }

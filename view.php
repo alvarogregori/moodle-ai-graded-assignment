@@ -15,7 +15,7 @@ require_capability('mod/aigradedassign:view', $context);
 $PAGE->set_url('/mod/aigradedassign/view.php', ['id' => $cm->id]);
 $PAGE->set_title(format_string($activity->name));
 $PAGE->set_heading(format_string($course->fullname));
-$PAGE->set_activity_record($activity);
+$PAGE->set_cm($cm, $course, $activity);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($activity->name));

@@ -31,7 +31,10 @@ $string['submissionsaved'] = 'Your work was submitted and evaluated.';
 $string['status:submitted'] = 'Submitted';
 $string['status:evaluated'] = 'Evaluated';
 $string['evaluation'] = 'Evaluation';
-$string['mockfeedback'] = "Mock evaluation\n\nYour response contains {$a->words} words and {$a->characters} characters.\n\nThis confirms the complete submission and evaluation workflow. No content was sent to an external AI provider.";
+$string['mockfeedback'] = 'Mock evaluation' . "\n\n"
+    . 'Your response contains {$a->words} words and {$a->characters} characters.' . "\n\n"
+    . 'This confirms the complete submission and evaluation workflow. '
+    . 'No content was sent to an external AI provider.';
 $string['completionevaluated'] = 'Student must submit work and receive an evaluation';
 $string['completionevaluated_desc'] = 'Submit work and receive an evaluation';
 $string['teacherprivatecontext'] = 'The rubric and evaluated example are private. Use the activity settings to review or edit them.';
