@@ -31,6 +31,9 @@ $string['submissionsaved'] = 'Your work was submitted and evaluated.';
 $string['status:submitted'] = 'Submitted';
 $string['status:evaluated'] = 'Evaluated';
 $string['evaluation'] = 'Evaluation';
+$string['scoreoutof'] = 'Score: {$a->score}/{$a->maximum}';
+$string['strengths'] = 'Strengths';
+$string['improvements'] = 'Areas for improvement';
 $string['mockfeedback'] = 'Mock evaluation' . "\n\n"
     . 'Your response contains {$a->words} words and {$a->characters} characters.' . "\n\n"
     . 'This confirms the complete submission and evaluation workflow. '

@@ -23,27 +23,34 @@ if (trim((string) $activity->intro) !== '') {
     echo $OUTPUT->box(format_module_intro('aigradedassign', $activity, $cm->id), 'generalbox mod_introbox');
 }
 
+$submission = $DB->get_record('aigradedassign_submissions', [
+    'aigradedassignid' => $activity->id,
+    'userid' => $USER->id,
+]);
+if ($submission) {
+    echo $OUTPUT->heading(get_string('yoursubmission', 'aigradedassign'), 3);
+    echo html_writer::tag('div', s($submission->submissiontext), ['class' => 'alert alert-light text-pre-wrap']);
+    $evaluation = $DB->get_record('aigradedassign_evaluations', [
+        'submissionid' => $submission->id,
+        'attemptnumber' => $submission->attemptnumber,
+    ]);
+    if ($evaluation && has_capability('mod/aigradedassign:viewownfeedback', $context)) {
+        echo $OUTPUT->heading(get_string('evaluation', 'aigradedassign'), 3);
+        if ($evaluation->score !== null) {
+            echo html_writer::tag('p', get_string('scoreoutof', 'aigradedassign', [
+                'score' => format_float($evaluation->score, 2, true),
+                'maximum' => 10,
+            ]), ['class' => 'fw-bold']);
+        }
+        echo html_writer::tag('div', s($evaluation->feedbacktext), ['class' => 'alert alert-success text-pre-wrap']);
+    }
+}
+
 if (has_capability('mod/aigradedassign:viewallsubmissions', $context)) {
     echo $OUTPUT->notification(get_string('teacherprivatecontext', 'aigradedassign'), 'info');
     $reporturl = new moodle_url('/mod/aigradedassign/report.php', ['id' => $cm->id]);
     echo $OUTPUT->single_button($reporturl, get_string('viewreport', 'aigradedassign'));
 } else if (has_capability('mod/aigradedassign:submit', $context)) {
-    $submission = $DB->get_record('aigradedassign_submissions', [
-        'aigradedassignid' => $activity->id,
-        'userid' => $USER->id,
-    ]);
-    if ($submission) {
-        echo $OUTPUT->heading(get_string('yoursubmission', 'aigradedassign'), 3);
-        echo html_writer::tag('div', s($submission->submissiontext), ['class' => 'alert alert-light text-pre-wrap']);
-        $evaluation = $DB->get_record('aigradedassign_evaluations', [
-            'submissionid' => $submission->id,
-            'attemptnumber' => $submission->attemptnumber,
-        ]);
-        if ($evaluation && has_capability('mod/aigradedassign:viewownfeedback', $context)) {
-            echo $OUTPUT->heading(get_string('evaluation', 'aigradedassign'), 3);
-            echo html_writer::tag('div', s($evaluation->feedbacktext), ['class' => 'alert alert-success text-pre-wrap']);
-        }
-    }
     $form = new \mod_aigradedassign\form\submission_form(
         new moodle_url('/mod/aigradedassign/submit.php', ['id' => $cm->id]),
         ['cmid' => $cm->id]

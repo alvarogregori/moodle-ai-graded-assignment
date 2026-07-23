@@ -211,5 +211,68 @@ function xmldb_aigradedassign_upgrade($oldversion): bool {
 
         upgrade_mod_savepoint(true, 2026072300, 'aigradedassign');
     }
+
+    if ($oldversion < 2026072302) {
+        $dbman = $DB->get_manager();
+        $evaluationtable = new xmldb_table('aigradedassign_evaluations');
+        $scorefield = new xmldb_field(
+            'score',
+            XMLDB_TYPE_NUMBER,
+            '10, 2',
+            null,
+            null,
+            null,
+            null,
+            'model'
+        );
+        if (!$dbman->field_exists($evaluationtable, $scorefield)) {
+            $dbman->add_field($evaluationtable, $scorefield);
+        }
+
+        $submissiontable = new xmldb_table('aigradedassign_submissions');
+        $legacyscorefield = new xmldb_field('score', XMLDB_TYPE_NUMBER);
+        $legacyresponsefield = new xmldb_field('airesponse', XMLDB_TYPE_TEXT);
+        if ($dbman->field_exists($submissiontable, $legacyscorefield)) {
+            $submissions = $DB->get_records_select(
+                'aigradedassign_submissions',
+                'score IS NOT NULL',
+                [],
+                '',
+                'id,attemptnumber,score,feedback,airesponse'
+            );
+            foreach ($submissions as $submission) {
+                $evaluation = $DB->get_record('aigradedassign_evaluations', [
+                    'submissionid' => $submission->id,
+                    'attemptnumber' => max(1, (int) $submission->attemptnumber),
+                ]);
+                if (!$evaluation) {
+                    continue;
+                }
+                $evaluation->score = $submission->score;
+
+                if ($dbman->field_exists($submissiontable, $legacyresponsefield)
+                        && !empty($submission->airesponse)) {
+                    $rawresponse = json_decode($submission->airesponse, true);
+                    $content = $rawresponse['choices'][0]['message']['content'] ?? '';
+                    $details = is_string($content) ? json_decode($content, true) : null;
+                    if (is_array($details)) {
+                        $parts = [trim((string) ($details['feedback'] ?? $submission->feedback))];
+                        if (!empty($details['strengths'])) {
+                            $parts[] = get_string('strengths', 'aigradedassign') . ":\n- "
+                                . implode("\n- ", array_map('trim', $details['strengths']));
+                        }
+                        if (!empty($details['improvements'])) {
+                            $parts[] = get_string('improvements', 'aigradedassign') . ":\n- "
+                                . implode("\n- ", array_map('trim', $details['improvements']));
+                        }
+                        $evaluation->feedbacktext = implode("\n\n", $parts);
+                    }
+                }
+                $DB->update_record('aigradedassign_evaluations', $evaluation);
+            }
+        }
+
+        upgrade_mod_savepoint(true, 2026072302, 'aigradedassign');
+    }
     return true;
 }

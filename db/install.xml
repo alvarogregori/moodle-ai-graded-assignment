@@ -51,6 +51,7 @@
         <FIELD NAME="attemptnumber" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1"/>
         <FIELD NAME="provider" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="mock"/>
         <FIELD NAME="model" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="mock-v1"/>
+        <FIELD NAME="score" TYPE="number" LENGTH="10" DECIMALS="2" NOTNULL="false"/>
         <FIELD NAME="feedbacktext" TYPE="text" NOTNULL="true"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
       </FIELDS>
