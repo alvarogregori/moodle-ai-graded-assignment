@@ -1,0 +1,11 @@
+/.phpunit.result.cache
+/vendor/
+/node_modules/
+/.idea/
+/.vscode/
+*.zip
+*.tar
+*.tgz
+*.log
+*.sql
+Thumbs.db
