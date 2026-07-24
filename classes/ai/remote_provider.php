@@ -170,9 +170,12 @@ abstract class remote_provider implements provider {
             'CURLOPT_RETURNTRANSFER' => true,
             'CURLOPT_POST' => true,
         ]);
-        $httpcode = (int) $curl->get_info('http_code');
+        $curlinfo = $curl->get_info();
+        $httpcode = (int) ($curlinfo['http_code'] ?? 0);
+        $curlerrno = $curl->get_errno();
         if (!is_string($response) || $response === '') {
-            throw new \moodle_exception('providerrequestfailed', 'aigradedassign', '', $httpcode);
+            $detail = $httpcode > 0 ? 'HTTP ' . $httpcode : 'cURL error ' . $curlerrno;
+            throw new \moodle_exception('providerrequestfailed', 'aigradedassign', '', $detail);
         }
         $data = json_decode($response, true);
         if (!is_array($data)) {
