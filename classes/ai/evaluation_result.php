@@ -17,11 +17,13 @@ final class evaluation_result {
      * @param string $feedback Plain-text feedback.
      * @param string $provider Provider identifier.
      * @param string $model Model identifier.
+     * @param float|null $score Numeric grade from 0 to 10, when available.
      */
     public function __construct(
         public readonly string $feedback,
         public readonly string $provider,
         public readonly string $model,
+        public readonly ?float $score = null,
     ) {
     }
 }

@@ -26,8 +26,8 @@ function aigradedassign_supports($feature) {
     return match ($feature) {
         FEATURE_MOD_INTRO,
         FEATURE_SHOW_DESCRIPTION,
-        FEATURE_COMPLETION_HAS_RULES => true,
-        FEATURE_GRADE_HAS_GRADE,
+        FEATURE_COMPLETION_HAS_RULES,
+        FEATURE_GRADE_HAS_GRADE => true,
         FEATURE_GRADE_OUTCOMES,
         FEATURE_COMPLETION_TRACKS_VIEWS,
         FEATURE_GROUPS,
@@ -52,7 +52,9 @@ function aigradedassign_add_instance($data, $mform = null): int {
     $data->timecreated = $now;
     $data->timemodified = $now;
 
-    return $DB->insert_record('aigradedassign', $data);
+    $data->id = $DB->insert_record('aigradedassign', $data);
+    aigradedassign_grade_item_update($data);
+    return $data->id;
 }
 
 /**
@@ -70,7 +72,10 @@ function aigradedassign_update_instance($data, $mform = null): bool {
     $data->completionevaluated = !empty($data->completionevaluated) ? 1 : 0;
     $data->timemodified = time();
 
-    return $DB->update_record('aigradedassign', $data);
+    $updated = $DB->update_record('aigradedassign', $data);
+    aigradedassign_grade_item_update($data);
+    aigradedassign_update_grades($data);
+    return $updated;
 }
 
 /**
@@ -86,6 +91,9 @@ function aigradedassign_delete_instance($id): bool {
         return false;
     }
 
+    $activity = $DB->get_record('aigradedassign', ['id' => $id], '*', MUST_EXIST);
+    aigradedassign_grade_item_delete($activity);
+
     $submissionids = $DB->get_fieldset_select(
         'aigradedassign_submissions',
         'id',
@@ -100,6 +108,104 @@ function aigradedassign_delete_instance($id): bool {
     $DB->delete_records('aigradedassign', ['id' => $id]);
 
     return true;
+}
+
+/**
+ * Creates or updates this activity's gradebook item.
+ *
+ * @param stdClass $activity Activity instance.
+ * @param mixed $grades Grade records accepted by grade_update().
+ * @return int Grade update status.
+ */
+function aigradedassign_grade_item_update($activity, $grades = null): int {
+    global $CFG;
+
+    require_once($CFG->libdir . '/gradelib.php');
+    $item = [
+        'itemname' => $activity->name,
+        'gradetype' => GRADE_TYPE_VALUE,
+        'grademin' => 0,
+        'grademax' => 10,
+    ];
+
+    return grade_update(
+        'mod/aigradedassign',
+        $activity->course,
+        'mod',
+        'aigradedassign',
+        $activity->id,
+        0,
+        $grades,
+        $item
+    );
+}
+
+/**
+ * Synchronises stored AI evaluations with the course gradebook.
+ *
+ * @param stdClass $activity Activity instance.
+ * @param int $userid Optional user id; zero updates all users.
+ * @param bool $nullifnone Whether to clear grades when no evaluation exists.
+ * @return int Grade update status.
+ */
+function aigradedassign_update_grades($activity, int $userid = 0, bool $nullifnone = true): int {
+    global $DB;
+
+    $params = ['activityid' => $activity->id];
+    $userwhere = '';
+    if ($userid) {
+        $userwhere = ' AND s.userid = :userid';
+        $params['userid'] = $userid;
+    }
+    $sql = "SELECT s.userid, s.timemodified AS datesubmitted,
+                   e.score AS rawgrade, e.feedbacktext AS feedback,
+                   e.timecreated AS dategraded
+              FROM {aigradedassign_submissions} s
+              JOIN {aigradedassign_evaluations} e
+                ON e.submissionid = s.id
+               AND e.attemptnumber = s.attemptnumber
+             WHERE s.aigradedassignid = :activityid
+                   $userwhere";
+    $records = $DB->get_records_sql($sql, $params);
+    $grades = [];
+    foreach ($records as $record) {
+        if ($record->rawgrade === null) {
+            continue;
+        }
+        $record->feedbackformat = FORMAT_PLAIN;
+        $grades[$record->userid] = $record;
+    }
+
+    if (!$grades && !$nullifnone) {
+        return GRADE_UPDATE_OK;
+    }
+    if ($userid && !$grades && $nullifnone) {
+        $grades[$userid] = (object) ['userid' => $userid, 'rawgrade' => null];
+    }
+
+    return aigradedassign_grade_item_update($activity, $grades ?: null);
+}
+
+/**
+ * Deletes this activity's grade item.
+ *
+ * @param stdClass $activity Activity instance.
+ * @return int Grade update status.
+ */
+function aigradedassign_grade_item_delete($activity): int {
+    global $CFG;
+
+    require_once($CFG->libdir . '/gradelib.php');
+    return grade_update(
+        'mod/aigradedassign',
+        $activity->course,
+        'mod',
+        'aigradedassign',
+        $activity->id,
+        0,
+        null,
+        ['deleted' => 1]
+    );
 }
 
 /**

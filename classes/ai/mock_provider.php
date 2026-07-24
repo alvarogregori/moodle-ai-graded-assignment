@@ -27,6 +27,6 @@ final class mock_provider implements provider {
             'characters' => $characters,
             'words' => $words,
         ]);
-        return new evaluation_result($feedback, 'mock', 'mock-v1');
+        return new evaluation_result($feedback, 'mock', 'mock-v1', 10.0);
     }
 }

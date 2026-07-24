@@ -37,6 +37,7 @@ final class evaluation_service {
             'attemptnumber' => $submission->attemptnumber,
             'provider' => $result->provider,
             'model' => $result->model,
+            'score' => $result->score,
             'feedbacktext' => $result->feedback,
             'timecreated' => time(),
         ];

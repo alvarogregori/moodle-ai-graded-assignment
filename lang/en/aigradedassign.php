@@ -3,7 +3,7 @@
 
 $string['pluginname'] = 'AI Graded Assignment';
 $string['modulename'] = 'AI Graded Assignment';
-$string['modulename_help'] = 'A plain-text assignment that stores automated feedback without writing to the gradebook.';
+$string['modulename_help'] = 'A plain-text assignment that stores automated feedback and its numeric result in the course gradebook.';
 $string['modulenameplural'] = 'AI Graded Assignments';
 $string['pluginadministration'] = 'AI Graded Assignment administration';
 $string['aigradedassignname'] = 'Activity name';

@@ -3,7 +3,7 @@
 `mod_aigradedassign` is a Moodle activity module for plain-text assignments with
 automated feedback.
 
-## Version 0.2.3 scope
+## Version 0.3.0 scope
 
 - Standard Moodle activity creation and editing.
 - Student-visible instructions.
@@ -11,8 +11,9 @@ automated feedback.
 - One current plain-text submission per student, with attempt history recorded
   in evaluation rows.
 - Deterministic local mock evaluation (no external network request).
+- Gradebook integration using a numeric grade from 0 to 10.
 - Automatic activity completion only after feedback is stored.
-- No gradebook writes and no file uploads.
+- No file uploads.
 - Provider-neutral PHP interface ready for later Mistral, OpenAI, and Anthropic
   adapters.
 

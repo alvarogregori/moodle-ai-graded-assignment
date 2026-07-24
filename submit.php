@@ -55,6 +55,7 @@ $submission->timemodified = $submission->timeevaluated;
 $DB->update_record('aigradedassign_submissions', $submission);
 $transaction->allow_commit();
 
+aigradedassign_update_grades($activity, $USER->id);
 $completion = new completion_info($course);
 $completion->update_state($cm, COMPLETION_COMPLETE, $USER->id);
 redirect(
