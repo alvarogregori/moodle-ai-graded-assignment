@@ -59,8 +59,15 @@ class mod_aigradedassign_mod_form extends moodleform_mod {
         $mform->setType('examplefeedback', PARAM_RAW);
         $mform->addRule('examplefeedback', null, 'required', null, 'client');
 
-        $mform->addElement('static', 'providerdisplay', get_string('provider', 'aigradedassign'),
-            get_string('provider:mock', 'aigradedassign'));
+        $mform->addElement('select', 'provider', get_string('provider', 'aigradedassign'), [
+            'mock' => get_string('provider:mock', 'aigradedassign'),
+            'mistral' => get_string('provider:mistral', 'aigradedassign'),
+            'openai' => get_string('provider:openai', 'aigradedassign'),
+            'anthropic' => get_string('provider:anthropic', 'aigradedassign'),
+            'compatible' => get_string('provider:compatible', 'aigradedassign'),
+        ]);
+        $mform->setDefault('provider', 'mock');
+        $mform->addHelpButton('provider', 'provider', 'aigradedassign');
 
         $this->standard_coursemodule_elements();
         $this->add_action_buttons();

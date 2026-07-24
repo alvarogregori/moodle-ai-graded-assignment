@@ -47,7 +47,7 @@ function aigradedassign_add_instance($data, $mform = null): int {
     global $DB;
 
     $now = time();
-    $data->provider = 'mock';
+    $data->provider = aigradedassign_normalise_provider($data->provider ?? 'mock');
     $data->completionevaluated = !empty($data->completionevaluated) ? 1 : 0;
     $data->timecreated = $now;
     $data->timemodified = $now;
@@ -68,7 +68,7 @@ function aigradedassign_update_instance($data, $mform = null): bool {
     global $DB;
 
     $data->id = $data->instance;
-    $data->provider = 'mock';
+    $data->provider = aigradedassign_normalise_provider($data->provider ?? 'mock');
     $data->completionevaluated = !empty($data->completionevaluated) ? 1 : 0;
     $data->timemodified = time();
 
@@ -76,6 +76,19 @@ function aigradedassign_update_instance($data, $mform = null): bool {
     aigradedassign_grade_item_update($data);
     aigradedassign_update_grades($data);
     return $updated;
+}
+
+/**
+ * Validates a provider submitted through the activity form.
+ *
+ * @param string $provider Provider identifier.
+ * @return string A supported provider identifier.
+ */
+function aigradedassign_normalise_provider(string $provider): string {
+    $provider = clean_param($provider, PARAM_ALPHA);
+    return in_array($provider, ['mock', 'mistral', 'openai', 'anthropic', 'compatible'], true)
+        ? $provider
+        : 'mock';
 }
 
 /**

@@ -21,7 +21,6 @@ if (!$data = $form->get_data()) {
     redirect(new moodle_url('/mod/aigradedassign/view.php', ['id' => $cm->id]));
 }
 
-$transaction = $DB->start_delegated_transaction();
 $now = time();
 $submission = $DB->get_record('aigradedassign_submissions', [
     'aigradedassignid' => $activity->id,
@@ -47,13 +46,21 @@ if ($submission) {
     $submission->id = $DB->insert_record('aigradedassign_submissions', $submission);
 }
 
-$service = new \mod_aigradedassign\local\evaluation_service();
-$service->evaluate($activity, $submission);
+try {
+    $service = new \mod_aigradedassign\local\evaluation_service();
+    $service->evaluate($activity, $submission);
+} catch (\Throwable $exception) {
+    redirect(
+        new moodle_url('/mod/aigradedassign/view.php', ['id' => $cm->id]),
+        get_string('evaluationfailed', 'aigradedassign', $exception->getMessage()),
+        null,
+        \core\output\notification::NOTIFY_ERROR
+    );
+}
 $submission->status = 'evaluated';
 $submission->timeevaluated = time();
 $submission->timemodified = $submission->timeevaluated;
 $DB->update_record('aigradedassign_submissions', $submission);
-$transaction->allow_commit();
 
 aigradedassign_update_grades($activity, $USER->id);
 $completion = new completion_info($course);

@@ -278,5 +278,9 @@ function xmldb_aigradedassign_upgrade($oldversion): bool {
     if ($oldversion < 2026072304) {
         upgrade_mod_savepoint(true, 2026072304, 'aigradedassign');
     }
+
+    if ($oldversion < 2026072400) {
+        upgrade_mod_savepoint(true, 2026072400, 'aigradedassign');
+    }
     return true;
 }

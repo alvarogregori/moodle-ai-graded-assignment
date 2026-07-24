@@ -4,7 +4,7 @@
 namespace mod_aigradedassign\local;
 
 use mod_aigradedassign\ai\evaluation_input;
-use mod_aigradedassign\ai\mock_provider;
+use mod_aigradedassign\ai\provider_factory;
 
 /**
  * Application service that evaluates and persists a submission.
@@ -24,7 +24,7 @@ final class evaluation_service {
     public function evaluate(\stdClass $activity, \stdClass $submission): \stdClass {
         global $DB;
 
-        $provider = new mock_provider();
+        $provider = provider_factory::create($activity->provider ?: 'mock');
         $result = $provider->evaluate(new evaluation_input(
             \content_to_text($activity->intro, $activity->introformat),
             $activity->rubrictext,
