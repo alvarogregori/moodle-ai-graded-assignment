@@ -286,5 +286,12 @@ function xmldb_aigradedassign_upgrade($oldversion): bool {
     if ($oldversion < 2026072401) {
         upgrade_mod_savepoint(true, 2026072401, 'aigradedassign');
     }
+
+    if ($oldversion < 2026072500) {
+        if (get_config('mod_aigradedassign', 'defaultprovider') === false) {
+            set_config('defaultprovider', 'mistral', 'mod_aigradedassign');
+        }
+        upgrade_mod_savepoint(true, 2026072500, 'aigradedassign');
+    }
     return true;
 }

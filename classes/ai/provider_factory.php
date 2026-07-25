@@ -18,6 +18,14 @@ final class provider_factory {
      * @return provider
      */
     public static function create(string $providername): provider {
+        if ($providername === 'default' || $providername === '') {
+            $configured = trim((string) get_config('mod_aigradedassign', 'defaultprovider'));
+            $providername = in_array(
+                $configured,
+                ['mistral', 'openai', 'anthropic', 'compatible', 'mock'],
+                true
+            ) ? $configured : 'mock';
+        }
         return match ($providername) {
             'mistral' => new mistral_provider(),
             'openai' => new openai_provider(),

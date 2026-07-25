@@ -47,7 +47,7 @@ function aigradedassign_add_instance($data, $mform = null): int {
     global $DB;
 
     $now = time();
-    $data->provider = aigradedassign_normalise_provider($data->provider ?? 'mock');
+    $data->provider = aigradedassign_normalise_provider($data->provider ?? 'default');
     $data->completionevaluated = !empty($data->completionevaluated) ? 1 : 0;
     $data->timecreated = $now;
     $data->timemodified = $now;
@@ -68,7 +68,7 @@ function aigradedassign_update_instance($data, $mform = null): bool {
     global $DB;
 
     $data->id = $data->instance;
-    $data->provider = aigradedassign_normalise_provider($data->provider ?? 'mock');
+    $data->provider = aigradedassign_normalise_provider($data->provider ?? 'default');
     $data->completionevaluated = !empty($data->completionevaluated) ? 1 : 0;
     $data->timemodified = time();
 
@@ -86,9 +86,9 @@ function aigradedassign_update_instance($data, $mform = null): bool {
  */
 function aigradedassign_normalise_provider(string $provider): string {
     $provider = clean_param($provider, PARAM_ALPHA);
-    return in_array($provider, ['mock', 'mistral', 'openai', 'anthropic', 'compatible'], true)
+    return in_array($provider, ['default', 'mock', 'mistral', 'openai', 'anthropic', 'compatible'], true)
         ? $provider
-        : 'mock';
+        : 'default';
 }
 
 /**

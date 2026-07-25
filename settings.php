@@ -9,6 +9,19 @@ if ($ADMIN->fulltree) {
         get_string('providerconfig', 'aigradedassign'),
         get_string('providerconfig_desc', 'aigradedassign')
     ));
+    $settings->add(new admin_setting_configselect(
+        'mod_aigradedassign/defaultprovider',
+        get_string('defaultprovider', 'aigradedassign'),
+        get_string('defaultprovider_desc', 'aigradedassign'),
+        'mistral',
+        [
+            'mistral' => get_string('provider:mistral', 'aigradedassign'),
+            'openai' => get_string('provider:openai', 'aigradedassign'),
+            'anthropic' => get_string('provider:anthropic', 'aigradedassign'),
+            'compatible' => get_string('provider:compatible', 'aigradedassign'),
+            'mock' => get_string('provider:mock', 'aigradedassign'),
+        ]
+    ));
 
     $providers = [
         'mistral' => ['https://api.mistral.ai/v1', 'mistral-small-latest'],
