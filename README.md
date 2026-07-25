@@ -36,7 +36,26 @@ The course-cache callback performs only one small database read and never calls
 an AI provider. Private rubric and example fields are not included in course
 module cache content and are not rendered on student pages.
 
+Remote evaluation is opt-in per activity. Existing and newly created activities
+use the local mock provider until a teacher explicitly selects Mistral, OpenAI,
+Anthropic, or an OpenAI-compatible provider. When a remote provider is selected,
+the assignment instructions, private rubric, private evaluated example, and
+student submission are sent to that provider for grading.
+
+API keys are stored only in Moodle's site-level plugin configuration and are not
+included in activity records, course caches, prompts, reports, or student pages.
+Only site administrators can configure credentials and provider base URLs.
+Custom base URLs should point only to services trusted by the site operator.
+
+Remote requests run outside database transactions. If a provider is unavailable,
+misconfigured, or returns an invalid response, the submission remains saved but
+is not marked as evaluated, activity completion is not awarded, and no new
+gradebook grade is written. Successful responses are validated as structured
+JSON, constrained to a score from 0 to 10, stored as plain-text feedback, and
+synchronised with the course gradebook.
+
 The upgrade from the original prototype preserves activity and submission rows,
 migrates the first evaluated example into the activity record, and renames the
-prototype submission/evaluation fields. Back up the plugin directory and
-database before any upgrade.
+prototype submission/evaluation fields. Upgrades do not send existing
+submissions to an AI provider. Back up the plugin directory and database before
+any upgrade.
