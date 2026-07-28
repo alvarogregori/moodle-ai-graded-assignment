@@ -34,7 +34,8 @@ if ($submission) {
         'submissionid' => $submission->id,
         'attemptnumber' => $submission->attemptnumber,
     ]);
-    if ($evaluation && has_capability('mod/aigradedassign:viewownfeedback', $context)) {
+    $evaluationavailable = $evaluation && $evaluation->reviewstatus === 'approved';
+    if ($evaluationavailable && has_capability('mod/aigradedassign:viewownfeedback', $context)) {
         echo $OUTPUT->heading(get_string('evaluation', 'aigradedassign'), 3);
         if ($evaluation->score !== null) {
             echo html_writer::tag('p', get_string('scoreoutof', 'aigradedassign', [
@@ -43,6 +44,9 @@ if ($submission) {
             ]), ['class' => 'fw-bold']);
         }
         echo html_writer::tag('div', s($evaluation->feedbacktext), ['class' => 'alert alert-success text-pre-wrap']);
+    } else if ($evaluation && $evaluation->reviewstatus === 'pending'
+            && has_capability('mod/aigradedassign:viewownfeedback', $context)) {
+        echo $OUTPUT->notification(get_string('awaitingtutorvalidation', 'aigradedassign'), 'info');
     }
 }
 

@@ -48,6 +48,7 @@ function aigradedassign_add_instance($data, $mform = null): int {
 
     $now = time();
     $data->provider = aigradedassign_normalise_provider($data->provider ?? 'default');
+    $data->requirevalidation = !empty($data->requirevalidation) ? 1 : 0;
     $data->completionevaluated = !empty($data->completionevaluated) ? 1 : 0;
     $data->timecreated = $now;
     $data->timemodified = $now;
@@ -69,6 +70,7 @@ function aigradedassign_update_instance($data, $mform = null): bool {
 
     $data->id = $data->instance;
     $data->provider = aigradedassign_normalise_provider($data->provider ?? 'default');
+    $data->requirevalidation = !empty($data->requirevalidation) ? 1 : 0;
     $data->completionevaluated = !empty($data->completionevaluated) ? 1 : 0;
     $data->timemodified = time();
 
@@ -177,6 +179,7 @@ function aigradedassign_update_grades($activity, int $userid = 0, bool $nullifno
               JOIN {aigradedassign_evaluations} e
                 ON e.submissionid = s.id
                AND e.attemptnumber = s.attemptnumber
+               AND e.reviewstatus = 'approved'
              WHERE s.aigradedassignid = :activityid
                    $userwhere";
     $records = $DB->get_records_sql($sql, $params);

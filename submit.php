@@ -46,6 +46,10 @@ if ($submission) {
     $submission->id = $DB->insert_record('aigradedassign_submissions', $submission);
 }
 
+aigradedassign_update_grades($activity, $USER->id);
+$completion = new completion_info($course);
+$completion->update_state($cm, COMPLETION_INCOMPLETE, $USER->id);
+
 try {
     $service = new \mod_aigradedassign\local\evaluation_service();
     $service->evaluate($activity, $submission);
@@ -57,17 +61,21 @@ try {
         \core\output\notification::NOTIFY_ERROR
     );
 }
-$submission->status = 'evaluated';
+$submission->status = !empty($activity->requirevalidation) ? 'pendingreview' : 'evaluated';
 $submission->timeevaluated = time();
 $submission->timemodified = $submission->timeevaluated;
 $DB->update_record('aigradedassign_submissions', $submission);
 
-aigradedassign_update_grades($activity, $USER->id);
-$completion = new completion_info($course);
-$completion->update_state($cm, COMPLETION_COMPLETE, $USER->id);
+if (empty($activity->requirevalidation)) {
+    aigradedassign_update_grades($activity, $USER->id);
+    $completion->update_state($cm, COMPLETION_COMPLETE, $USER->id);
+}
 redirect(
     new moodle_url('/mod/aigradedassign/view.php', ['id' => $cm->id]),
-    get_string('submissionsaved', 'aigradedassign'),
+    get_string(
+        !empty($activity->requirevalidation) ? 'submissionpendingreview' : 'submissionsaved',
+        'aigradedassign'
+    ),
     null,
     \core\output\notification::NOTIFY_SUCCESS
 );

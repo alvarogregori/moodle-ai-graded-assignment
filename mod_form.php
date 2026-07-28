@@ -70,6 +70,14 @@ class mod_aigradedassign_mod_form extends moodleform_mod {
         $mform->setDefault('provider', 'default');
         $mform->addHelpButton('provider', 'provider', 'aigradedassign');
 
+        $mform->addElement(
+            'advcheckbox',
+            'requirevalidation',
+            get_string('tutorvalidation', 'aigradedassign'),
+            get_string('tutorvalidation_desc', 'aigradedassign')
+        );
+        $mform->setDefault('requirevalidation', 0);
+
         $this->standard_coursemodule_elements();
         $this->add_action_buttons();
     }

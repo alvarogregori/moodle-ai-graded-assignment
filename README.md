@@ -3,7 +3,7 @@
 `mod_aigradedassign` is a Moodle activity module for plain-text assignments with
 automated feedback.
 
-## Version 0.4.2 scope
+## Version 0.5.0 scope
 
 - Standard Moodle activity creation and editing.
 - Student-visible instructions.
@@ -15,6 +15,8 @@ automated feedback.
 - Site-level protected API key, model, and base URL settings for each remote
   provider.
 - Gradebook integration using a numeric grade from 0 to 10.
+- Optional tutor validation workflow. AI grades and assessments can remain
+  private until a tutor validates or edits both values.
 - Automatic activity completion only after feedback is stored.
 - No file uploads.
 - Provider-neutral PHP interface and structured JSON grading response.
@@ -52,8 +54,9 @@ Remote requests run outside database transactions. If a provider is unavailable,
 misconfigured, or returns an invalid response, the submission remains saved but
 is not marked as evaluated, activity completion is not awarded, and no new
 gradebook grade is written. Successful responses are validated as structured
-JSON, constrained to a score from 0 to 10, stored as plain-text feedback, and
-synchronised with the course gradebook.
+JSON and constrained to a score from 0 to 10. When tutor validation is enabled,
+the AI result remains private and does not affect completion or the gradebook
+until a tutor approves or edits both the grade and plain-text assessment.
 
 The upgrade from the original prototype preserves activity and submission rows,
 migrates the first evaluated example into the activity record, and renames the

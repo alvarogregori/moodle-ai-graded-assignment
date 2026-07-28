@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/aigradedassign/db" VERSION="2026072300" COMMENT="XMLDB file for mod_aigradedassign"
+<XMLDB PATH="mod/aigradedassign/db" VERSION="2026072800" COMMENT="XMLDB file for mod_aigradedassign"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
@@ -13,7 +13,8 @@
         <FIELD NAME="rubrictext" TYPE="text" NOTNULL="true"/>
         <FIELD NAME="exampletext" TYPE="text" NOTNULL="true"/>
         <FIELD NAME="examplefeedback" TYPE="text" NOTNULL="true"/>
-        <FIELD NAME="provider" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="mock"/>
+        <FIELD NAME="provider" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="default"/>
+        <FIELD NAME="requirevalidation" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="completionevaluated" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
@@ -53,11 +54,15 @@
         <FIELD NAME="model" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="mock-v1"/>
         <FIELD NAME="score" TYPE="number" LENGTH="10" DECIMALS="2" NOTNULL="false"/>
         <FIELD NAME="feedbacktext" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="reviewstatus" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="approved"/>
+        <FIELD NAME="reviewedby" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="timereviewed" TYPE="int" LENGTH="10" NOTNULL="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="submission" TYPE="foreign" FIELDS="submissionid" REFTABLE="aigradedassign_submissions" REFFIELDS="id"/>
+        <KEY NAME="reviewer" TYPE="foreign" FIELDS="reviewedby" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="submissionattempt" UNIQUE="true" FIELDS="submissionid,attemptnumber"/>

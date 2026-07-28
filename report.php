@@ -19,7 +19,8 @@ $PAGE->set_cm($cm, $course, $activity);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('report', 'aigradedassign'));
 $sql = "SELECT s.id, s.userid, s.status, s.attemptnumber, s.timemodified, s.timeevaluated,
-               u.firstname, u.lastname, e.score AS evaluationscore, e.feedbacktext AS assessment
+               u.firstname, u.lastname, e.id AS evaluationid, e.score AS evaluationscore,
+               e.feedbacktext AS assessment, e.reviewstatus
           FROM {aigradedassign_submissions} s
           JOIN {user} u ON u.id = s.userid
      LEFT JOIN {aigradedassign_evaluations} e
@@ -28,6 +29,13 @@ $sql = "SELECT s.id, s.userid, s.status, s.attemptnumber, s.timemodified, s.time
          WHERE s.aigradedassignid = :activityid
       ORDER BY s.timemodified DESC";
 $records = $DB->get_records_sql($sql, ['activityid' => $activity->id]);
+$showreview = !empty($activity->requirevalidation);
+foreach ($records as $record) {
+    if ($record->reviewstatus === 'pending') {
+        $showreview = true;
+        break;
+    }
+}
 $table = new html_table();
 $table->head = [
     get_string('student', 'aigradedassign'),
@@ -37,6 +45,9 @@ $table->head = [
     get_string('grading', 'aigradedassign'),
     get_string('assessment', 'aigradedassign'),
 ];
+if ($showreview) {
+    $table->head[] = get_string('tutorreview', 'aigradedassign');
+}
 foreach ($records as $record) {
     $grading = $record->evaluationscore === null
         ? '-'
@@ -47,7 +58,7 @@ foreach ($records as $record) {
     $assessment = trim((string) $record->assessment) === ''
         ? '-'
         : html_writer::tag('div', s($record->assessment), ['class' => 'text-pre-wrap']);
-    $table->data[] = [
+    $row = [
         fullname($record),
         get_string('status:' . $record->status, 'aigradedassign'),
         userdate($record->timemodified),
@@ -55,6 +66,21 @@ foreach ($records as $record) {
         $grading,
         $assessment,
     ];
+    if ($showreview) {
+        if ($record->evaluationid && has_capability('mod/aigradedassign:grade', $context)) {
+            $reviewurl = new moodle_url('/mod/aigradedassign/review.php', [
+                'id' => $cm->id,
+                'evaluationid' => $record->evaluationid,
+            ]);
+            $label = $record->reviewstatus === 'approved'
+                ? get_string('editvalidation', 'aigradedassign')
+                : get_string('reviewandvalidate', 'aigradedassign');
+            $row[] = html_writer::link($reviewurl, $label, ['class' => 'btn btn-primary btn-sm']);
+        } else {
+            $row[] = '-';
+        }
+    }
+    $table->data[] = $row;
 }
 echo html_writer::table($table);
 echo $OUTPUT->footer();

@@ -52,6 +52,16 @@ $capabilities = [
         ],
     ],
 
+    'mod/aigradedassign:grade' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
     'mod/aigradedassign:reevaluate' => [
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',

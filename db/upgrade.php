@@ -293,5 +293,66 @@ function xmldb_aigradedassign_upgrade($oldversion): bool {
         }
         upgrade_mod_savepoint(true, 2026072500, 'aigradedassign');
     }
+
+    if ($oldversion < 2026072800) {
+        $dbman = $DB->get_manager();
+        $activitytable = new xmldb_table('aigradedassign');
+        $requirevalidation = new xmldb_field(
+            'requirevalidation',
+            XMLDB_TYPE_INTEGER,
+            '1',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'provider'
+        );
+        if (!$dbman->field_exists($activitytable, $requirevalidation)) {
+            $dbman->add_field($activitytable, $requirevalidation);
+        }
+
+        $evaluationtable = new xmldb_table('aigradedassign_evaluations');
+        $reviewstatus = new xmldb_field(
+            'reviewstatus',
+            XMLDB_TYPE_CHAR,
+            '20',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            'approved',
+            'feedbacktext'
+        );
+        if (!$dbman->field_exists($evaluationtable, $reviewstatus)) {
+            $dbman->add_field($evaluationtable, $reviewstatus);
+        }
+        $reviewedby = new xmldb_field(
+            'reviewedby',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            null,
+            null,
+            null,
+            'reviewstatus'
+        );
+        if (!$dbman->field_exists($evaluationtable, $reviewedby)) {
+            $dbman->add_field($evaluationtable, $reviewedby);
+        }
+        $timereviewed = new xmldb_field(
+            'timereviewed',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            null,
+            null,
+            null,
+            'reviewedby'
+        );
+        if (!$dbman->field_exists($evaluationtable, $timereviewed)) {
+            $dbman->add_field($evaluationtable, $timereviewed);
+        }
+
+        upgrade_mod_savepoint(true, 2026072800, 'aigradedassign');
+    }
     return true;
 }

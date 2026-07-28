@@ -39,6 +39,7 @@ final class evaluation_service {
             'model' => $result->model,
             'score' => $result->score,
             'feedbacktext' => $result->feedback,
+            'reviewstatus' => !empty($activity->requirevalidation) ? 'pending' : 'approved',
             'timecreated' => time(),
         ];
         $record->id = $DB->insert_record('aigradedassign_evaluations', $record);
