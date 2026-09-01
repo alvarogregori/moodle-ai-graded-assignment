@@ -16,15 +16,13 @@ final class evaluation_input {
      *
      * @param string $instructions Student-visible instructions.
      * @param string $rubric Private rubric.
-     * @param string $exampletext Private example submission.
-     * @param string $examplefeedback Private example feedback.
+     * @param array $examples Private evaluated examples.
      * @param string $submission Student submission.
      */
     public function __construct(
         public readonly string $instructions,
         public readonly string $rubric,
-        public readonly string $exampletext,
-        public readonly string $examplefeedback,
+        public readonly array $examples,
         public readonly string $submission,
     ) {
     }

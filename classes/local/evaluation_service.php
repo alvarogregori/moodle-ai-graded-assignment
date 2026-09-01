@@ -25,11 +25,19 @@ final class evaluation_service {
         global $DB;
 
         $provider = provider_factory::create($activity->provider ?: 'mock');
+        $examples = [];
+        for ($number = 1; $number <= 3; $number++) {
+            $suffix = $number === 1 ? '' : (string) $number;
+            $text = trim((string) ($activity->{'exampletext' . $suffix} ?? ''));
+            $feedback = trim((string) ($activity->{'examplefeedback' . $suffix} ?? ''));
+            if ($text !== '' && $feedback !== '') {
+                $examples[] = ['submission' => $text, 'assessment' => $feedback];
+            }
+        }
         $result = $provider->evaluate(new evaluation_input(
             \content_to_text($activity->intro, $activity->introformat),
             $activity->rubrictext,
-            $activity->exampletext,
-            $activity->examplefeedback,
+            $examples,
             $submission->submissiontext,
         ));
         $record = (object) [

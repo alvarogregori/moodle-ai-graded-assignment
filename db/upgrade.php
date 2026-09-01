@@ -354,5 +354,32 @@ function xmldb_aigradedassign_upgrade($oldversion): bool {
 
         upgrade_mod_savepoint(true, 2026072800, 'aigradedassign');
     }
+
+    if ($oldversion < 2026090100) {
+        $dbman = $DB->get_manager();
+        $activitytable = new xmldb_table('aigradedassign');
+        $previousfield = 'examplefeedback';
+        foreach ([2, 3] as $number) {
+            foreach (['exampletext', 'examplefeedback'] as $basename) {
+                $fieldname = $basename . $number;
+                $field = new xmldb_field(
+                    $fieldname,
+                    XMLDB_TYPE_TEXT,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    $previousfield
+                );
+                if (!$dbman->field_exists($activitytable, $field)) {
+                    $dbman->add_field($activitytable, $field);
+                }
+                $previousfield = $fieldname;
+            }
+        }
+
+        upgrade_mod_savepoint(true, 2026090100, 'aigradedassign');
+    }
     return true;
 }

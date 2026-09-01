@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/aigradedassign/db" VERSION="2026072800" COMMENT="XMLDB file for mod_aigradedassign"
+<XMLDB PATH="mod/aigradedassign/db" VERSION="2026090100" COMMENT="XMLDB file for mod_aigradedassign"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
@@ -13,6 +13,10 @@
         <FIELD NAME="rubrictext" TYPE="text" NOTNULL="true"/>
         <FIELD NAME="exampletext" TYPE="text" NOTNULL="true"/>
         <FIELD NAME="examplefeedback" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="exampletext2" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="examplefeedback2" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="exampletext3" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="examplefeedback3" TYPE="text" NOTNULL="false"/>
         <FIELD NAME="provider" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="default"/>
         <FIELD NAME="requirevalidation" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="completionevaluated" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>

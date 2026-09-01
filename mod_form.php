@@ -45,19 +45,30 @@ class mod_aigradedassign_mod_form extends moodleform_mod {
         $mform->addRule('rubrictext', null, 'required', null, 'client');
         $mform->addHelpButton('rubrictext', 'rubric', 'aigradedassign');
 
-        $mform->addElement('textarea', 'exampletext', get_string('exampletext', 'aigradedassign'), [
-            'rows' => 8,
-            'cols' => 80,
-        ]);
-        $mform->setType('exampletext', PARAM_RAW);
-        $mform->addRule('exampletext', null, 'required', null, 'client');
+        for ($number = 1; $number <= 3; $number++) {
+            $suffix = $number === 1 ? '' : (string) $number;
+            $mform->addElement('header', 'exampleheader' . $number,
+                get_string('examplenumber', 'aigradedassign', $number));
+            $mform->setExpanded('exampleheader' . $number, $number === 1);
 
-        $mform->addElement('textarea', 'examplefeedback', get_string('examplefeedback', 'aigradedassign'), [
-            'rows' => 8,
-            'cols' => 80,
-        ]);
-        $mform->setType('examplefeedback', PARAM_RAW);
-        $mform->addRule('examplefeedback', null, 'required', null, 'client');
+            $mform->addElement('textarea', 'exampletext' . $suffix,
+                get_string('exampletext', 'aigradedassign'), [
+                    'rows' => 8,
+                    'cols' => 80,
+                ]);
+            $mform->setType('exampletext' . $suffix, PARAM_RAW);
+
+            $mform->addElement('textarea', 'examplefeedback' . $suffix,
+                get_string('examplefeedback', 'aigradedassign'), [
+                    'rows' => 8,
+                    'cols' => 80,
+                ]);
+            $mform->setType('examplefeedback' . $suffix, PARAM_RAW);
+            if ($number === 1) {
+                $mform->addRule('exampletext', null, 'required', null, 'client');
+                $mform->addRule('examplefeedback', null, 'required', null, 'client');
+            }
+        }
 
         $mform->addElement('select', 'provider', get_string('provider', 'aigradedassign'), [
             'default' => get_string('provider:default', 'aigradedassign'),
@@ -129,6 +140,16 @@ class mod_aigradedassign_mod_form extends moodleform_mod {
         foreach (['rubrictext', 'exampletext', 'examplefeedback'] as $field) {
             if (trim((string) ($data[$field] ?? '')) === '') {
                 $errors[$field] = get_string('required');
+            }
+        }
+        foreach ([2, 3] as $number) {
+            $textfield = 'exampletext' . $number;
+            $feedbackfield = 'examplefeedback' . $number;
+            $hastext = trim((string) ($data[$textfield] ?? '')) !== '';
+            $hasfeedback = trim((string) ($data[$feedbackfield] ?? '')) !== '';
+            if ($hastext !== $hasfeedback) {
+                $missingfield = $hastext ? $feedbackfield : $textfield;
+                $errors[$missingfield] = get_string('errorexamplepair', 'aigradedassign');
             }
         }
         return $errors;

@@ -3,11 +3,12 @@
 `mod_aigradedassign` is a Moodle activity module for plain-text assignments with
 automated feedback.
 
-## Version 0.5.0 scope
+## Version 0.6.0 scope
 
 - Standard Moodle activity creation and editing.
 - Student-visible instructions.
-- Private plain-text rubric, example submission, and example evaluation.
+- Private plain-text rubric and one to three evaluated examples. The first
+  example is required; examples two and three are optional complete pairs.
 - One current plain-text submission per student, with attempt history recorded
   in evaluation rows.
 - Evaluation through Mistral, OpenAI, Anthropic, a generic OpenAI-compatible
@@ -42,7 +43,7 @@ Remote evaluation is the default behaviour. Mistral is the initial site-wide
 default provider, and new activities inherit the site default unless a teacher
 selects a different provider. The local mock remains available as an explicit
 no-network option. When a remote provider is used, the assignment instructions,
-private rubric, private evaluated example, and student submission are sent to
+private rubric, private evaluated examples, and student submission are sent to
 that provider for grading.
 
 API keys are stored only in Moodle's site-level plugin configuration and are not
