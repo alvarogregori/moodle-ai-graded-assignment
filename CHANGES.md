@@ -2,6 +2,7 @@
 
 ## 0.6.1-alpha (2026-09-16)
 
+- Add the required course activity index page for Marketplace validation.
 - Add Moodle Privacy API metadata, export, and deletion support.
 - Add Moodle Backup and Restore API support for activities, submissions, and evaluations.
 - Document external AI data transfers and gradebook storage.

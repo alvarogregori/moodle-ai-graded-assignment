@@ -5,6 +5,7 @@ $string['pluginname'] = 'AI Graded Assignment';
 $string['modulename'] = 'AI Graded Assignment';
 $string['modulename_help'] = 'A plain-text assignment that stores automated feedback and its numeric result in the course gradebook.';
 $string['modulenameplural'] = 'AI Graded Assignments';
+$string['noactivities'] = 'There are no AI Graded Assignment activities in this course.';
 $string['pluginadministration'] = 'AI Graded Assignment administration';
 $string['aigradedassignname'] = 'Activity name';
 $string['aigradedassign:addinstance'] = 'Add a new AI Graded Assignment';
