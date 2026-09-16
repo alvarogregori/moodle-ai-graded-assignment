@@ -27,6 +27,7 @@ function aigradedassign_supports($feature) {
         FEATURE_MOD_INTRO,
         FEATURE_SHOW_DESCRIPTION,
         FEATURE_COMPLETION_HAS_RULES,
+        FEATURE_BACKUP_MOODLE2,
         FEATURE_GRADE_HAS_GRADE => true,
         FEATURE_GRADE_OUTCOMES,
         FEATURE_COMPLETION_TRACKS_VIEWS,

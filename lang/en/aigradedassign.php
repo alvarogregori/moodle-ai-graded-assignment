@@ -43,7 +43,7 @@ $string['baseurl'] = 'API base URL';
 $string['baseurl_desc'] = 'Base URL without the final endpoint path. Change it only for a trusted service.';
 $string['generationsettings'] = 'Generation settings';
 $string['maxtokens'] = 'Maximum output tokens';
-$string['maxtokens_desc'] = 'Maximum tokens allowed for the structured assessment response (1–8000).';
+$string['maxtokens_desc'] = 'Maximum tokens allowed for the structured assessment response (1-8000).';
 $string['temperature'] = 'Temperature';
 $string['temperature_desc'] = 'Sampling temperature. For consistent grading, a low value such as 0.2 is recommended.';
 $string['submitwork'] = 'Submit and evaluate';
@@ -60,10 +60,11 @@ $string['assessment'] = 'Assessment';
 $string['scoreoutof'] = 'Score: {$a->score}/{$a->maximum}';
 $string['strengths'] = 'Strengths';
 $string['improvements'] = 'Areas for improvement';
-$string['mockfeedback'] = 'Mock evaluation' . "\n\n"
-    . 'Your response contains {$a->words} words and {$a->characters} characters.' . "\n\n"
-    . 'This confirms the complete submission and evaluation workflow. '
-    . 'No content was sent to an external AI provider.';
+$string['mockfeedback'] = 'Mock evaluation
+
+Your response contains {$a->words} words and {$a->characters} characters.
+
+This confirms the complete submission and evaluation workflow. No content was sent to an external AI provider.';
 $string['completionevaluated'] = 'Student must submit work and receive an evaluation';
 $string['completionevaluated_desc'] = 'Submit work and receive an evaluation';
 $string['teacherprivatecontext'] = 'The rubric and evaluated example are private. Use the activity settings to review or edit them.';
@@ -98,3 +99,26 @@ $string['privacy:metadata:aigradedassign_submissions:userid'] = 'The user who su
 $string['privacy:metadata:aigradedassign_submissions:submissiontext'] = 'The plain-text response.';
 $string['privacy:metadata:aigradedassign_evaluations'] = 'Stores generated feedback.';
 $string['privacy:metadata:aigradedassign_evaluations:feedbacktext'] = 'The generated plain-text feedback.';
+$string['privacy:metadata:submissions:aigradedassignid'] = 'The activity that received the submission.';
+$string['privacy:metadata:submissions:userid'] = 'The user who made the submission.';
+$string['privacy:metadata:submissions:submissiontext'] = 'The submitted plain-text response.';
+$string['privacy:metadata:submissions:status'] = 'The current submission and evaluation status.';
+$string['privacy:metadata:submissions:attemptnumber'] = 'The current attempt number.';
+$string['privacy:metadata:submissions:timecreated'] = 'The time the submission was first created.';
+$string['privacy:metadata:submissions:timemodified'] = 'The time the submission was last modified.';
+$string['privacy:metadata:submissions:timeevaluated'] = 'The time the current attempt was evaluated.';
+$string['privacy:metadata:evaluations:submissionid'] = 'The submission associated with the evaluation.';
+$string['privacy:metadata:evaluations:attemptnumber'] = 'The submission attempt that was evaluated.';
+$string['privacy:metadata:evaluations:provider'] = 'The AI provider used for the evaluation.';
+$string['privacy:metadata:evaluations:model'] = 'The AI model used for the evaluation.';
+$string['privacy:metadata:evaluations:score'] = 'The numeric score returned or approved for the submission.';
+$string['privacy:metadata:evaluations:reviewstatus'] = 'Whether the AI evaluation is awaiting or has received tutor approval.';
+$string['privacy:metadata:evaluations:reviewedby'] = 'The tutor who reviewed the evaluation.';
+$string['privacy:metadata:evaluations:timereviewed'] = 'The time the tutor reviewed the evaluation.';
+$string['privacy:metadata:evaluations:timecreated'] = 'The time the AI evaluation was created.';
+$string['privacy:metadata:core_grades'] = 'The plugin stores approved numeric results in the Moodle gradebook.';
+$string['privacy:metadata:external'] = 'When a remote provider is selected, evaluation context is sent to the configured AI provider.';
+$string['privacy:metadata:external:submissiontext'] = 'The student submission to be evaluated.';
+$string['privacy:metadata:external:instructions'] = 'The assignment instructions.';
+$string['privacy:metadata:external:rubric'] = 'The private grading rubric.';
+$string['privacy:metadata:external:examples'] = 'The private evaluated examples configured by the teacher.';
