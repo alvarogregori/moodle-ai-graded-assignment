@@ -1,5 +1,18 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 $string['pluginname'] = 'AI Graded Assignment';
 $string['modulename'] = 'AI Graded Assignment';
@@ -13,7 +26,6 @@ $string['aigradedassign:view'] = 'View AI Graded Assignment';
 $string['aigradedassign:submit'] = 'Submit work';
 $string['aigradedassign:viewownfeedback'] = 'View own feedback';
 $string['aigradedassign:viewallsubmissions'] = 'View all submissions';
-$string['aigradedassign:reevaluate'] = 'Re-evaluate submissions';
 $string['aigradedassign:grade'] = 'Validate and edit AI evaluations';
 $string['instructions'] = 'Assignment instructions';
 $string['evaluationcontext'] = 'Private evaluation context';

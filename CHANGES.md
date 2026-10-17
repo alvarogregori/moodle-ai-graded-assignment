@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.2-alpha (2026-10-17)
+
+- Add the GPL v3 license file and complete missing PHP boilerplate headers.
+- Make backup restores decode links in the activity introduction.
+- Trigger the standard course module viewed event.
+- Remove the empty default from the activity name field.
+- Remove the unused reevaluate capability and language strings.
+
 ## 0.6.1-alpha (2026-09-16)
 
 - Add the required course activity index page for Marketplace validation.

@@ -60,6 +60,17 @@ class restore_aigradedassign_activity_task extends restore_activity_task {
     }
 
     /**
+     * Defines the activity content fields that must be processed by the link decoder.
+     *
+     * @return restore_decode_content[]
+     */
+    public static function define_decode_contents(): array {
+        return [
+            new restore_decode_content('aigradedassign', ['intro'], 'aigradedassign'),
+        ];
+    }
+
+    /**
      * No restore log rules are required.
      *
      * @return restore_log_rule[]
